@@ -1,108 +1,92 @@
-import java.util.ArrayList;
-
-public class FunnyNumbers extends Thread  {
-    private static volatile ArrayList<String> numbers = new ArrayList<>();
+public class FunnyNumbers extends Thread {
+    public static volatile int number = 1;
     private final static Object monitor = new Object();
-    private static volatile int count;
 
-    public static void main(String[] args) throws InterruptedException {
-        Thread fizz = new Thread(() -> {
+    private static Thread fizz = new Thread(() -> {
+        do {
             synchronized (monitor)  {
                 try {
-                    if(count % 3 == 0 && count != 0) {
-                        addAmount("fizz");
-                        count++;
+                    if(number % 3 == 0 && number % 5 != 0) {
+                        System.out.println("fizz");
+                        increment();
                     }
                     monitor.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-        });
+        } while (true);
+    });
 
-        Thread buzz = new Thread(() -> {
+    private static Thread buzz = new Thread(() -> {
+        do {
             synchronized (monitor) {
                 try {
-                    if(count % 5 == 0 && count != 0) {
-                        addAmount("buzz");
-                        count++;
+                    if(number % 5 == 0) {
+                        System.out.println("buzz");
+                        increment();
                     }
                     monitor.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-        });
+        } while (true);
+    });
 
-        Thread fizzbuzz = new Thread(() -> {
+    private static Thread fizzbuzz = new Thread(() -> {
+        do {
             synchronized (monitor) {
                 try {
-                    if(count % 5 == 0 && count % 3 == 0 && count != 0) {
-                        addAmount("fizzbuzz");
-                        count++;
+                    if(number % 5 == 0 && number % 3 == 0) {
+                        System.out.println("fizzbuzz");
+                        increment();
                     }
                     monitor.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            }
-        });
 
-        Thread number = new Thread(() -> {
-            synchronized (monitor) {
-                try {
-                    System.out.println((count % 5 != 0 || count % 3 != 0) || count == 0);
-                    if((count % 5 != 0 || count % 3 != 0) || count == 0) {
-                        numbers.add(Integer.toString(count));
-                        count++;
-                        System.out.println(count);
+            }
+        } while (true);
+    });
+
+    private static Thread numbers = new Thread(() -> {
+            do {
+                synchronized (monitor) {
+                    try {
+                        if (number % 5 != 0 && number % 3 != 0) {
+                            System.out.println(number);
+                            increment();
+                        }
+                        monitor.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-                    System.out.println(numbers);
-                    monitor.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
-            }
-        });
+            } while (true);
+    });
 
+    @Override
+    public void run() {
         fizz.start();
         buzz.start();
         fizzbuzz.start();
-        number.start();
+        numbers.start();
 
-        for(int i = 0; i < 15; i++) {
-            synchronized(monitor) {
-
-                while(count == i) {
-                    synchronized(number) {
-                        monitor.wait();
-                        number.notify();
+        do {
+                try {
+                    synchronized (monitor) {
+                        monitor.notifyAll();
                     }
-
-                    synchronized(fizzbuzz) {
-                        monitor.wait();
-                        fizzbuzz.notify();
-                    }
-
-                    synchronized(fizz) {
-                        monitor.wait();
-                        fizz.notify();
-                    }
-
-                    synchronized(buzz) {
-                        monitor.wait();
-                        buzz.notify();
-                    }
+                    sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-                System.out.println(count + " count");
-
-            }
-        }
-
-        System.out.println(numbers);
+        } while (true);
     }
 
-    private static synchronized void addAmount(String amount) throws InterruptedException  {
-        numbers.add(amount);
+    private static synchronized void increment() {
+        number++;
     }
 }

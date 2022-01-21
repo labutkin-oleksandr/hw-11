@@ -2,9 +2,9 @@ public class FunnyNumbers extends Thread {
     public static volatile int number = 1;
     private final static Object monitor = new Object();
 
-    private static Thread fizz = new Thread(() -> {
+    private final static Thread fizz = new Thread(() -> {
         do {
-            synchronized (monitor)  {
+            synchronized (monitor) {
                 try {
                     if(number % 3 == 0 && number % 5 != 0) {
                         System.out.println("fizz");
@@ -18,11 +18,11 @@ public class FunnyNumbers extends Thread {
         } while (true);
     });
 
-    private static Thread buzz = new Thread(() -> {
+    private final static Thread buzz = new Thread(() -> {
         do {
             synchronized (monitor) {
                 try {
-                    if(number % 5 == 0) {
+                    if(number % 5 == 0 && number % 3 != 0 ) {
                         System.out.println("buzz");
                         increment();
                     }
@@ -34,7 +34,7 @@ public class FunnyNumbers extends Thread {
         } while (true);
     });
 
-    private static Thread fizzbuzz = new Thread(() -> {
+    private final static Thread fizzbuzz = new Thread(() -> {
         do {
             synchronized (monitor) {
                 try {
@@ -51,7 +51,7 @@ public class FunnyNumbers extends Thread {
         } while (true);
     });
 
-    private static Thread numbers = new Thread(() -> {
+    private final static Thread numbers = new Thread(() -> {
             do {
                 synchronized (monitor) {
                     try {
